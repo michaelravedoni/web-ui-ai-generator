@@ -7,6 +7,8 @@ import shutil
 import subprocess
 from pathlib import Path
 from datetime import datetime
+import threading
+import time
 
 # ANSI Colors
 class Colors:
@@ -20,6 +22,34 @@ class Colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     BG_CYAN = '\033[46m\033[30m'
+    YELLOW = '\033[93m'
+    YELLOW = '\033[93m'
+
+class Spinner:
+    def __init__(self, message="Processing..."):
+        self.message = message
+        self.stop_running = False
+        self.thread = threading.Thread(target=self._animate)
+
+    def start(self):
+        self.stop_running = False
+        self.thread.start()
+
+    def stop(self):
+        self.stop_running = True
+        self.thread.join()
+
+    def _animate(self):
+        chars = "|/-\\"
+        idx = 0
+        while not self.stop_running:
+            sys.stdout.write(f"\r{self.message} {chars[idx % len(chars)]}")
+            sys.stdout.flush()
+            time.sleep(0.1)
+            idx += 1
+        # Clear line
+        sys.stdout.write(f"\r{' ' * (len(self.message) + 5)}\r")
+        sys.stdout.flush()
 
 # Paths
 BASE_DIR = Path(__file__).parent
@@ -58,6 +88,13 @@ class KitchenAssistant:
                 self.config = json.load(f)
         else:
             self.config = {"project": {}, "strategy": {}}
+        
+        # Ensure LLM config exists
+        if "llm" not in self.config:
+            self.config["llm"] = {
+                "command": "gemini",
+                "auto_run": False
+            }
 
     def save_config(self):
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
@@ -83,6 +120,71 @@ class KitchenAssistant:
         except Exception as e:
             return False
 
+    def run_llm_command(self, prompt_content, output_filename):
+        llm_config = self.config.get("llm", {})
+        command = llm_config.get("command", "gemini")
+        
+        print(f"\n{Colors.BOLD}>>> Executing with {command}...{Colors.ENDC}")
+        
+        # Ensure output directory exists
+        output_dir = BASE_DIR / "output"
+        output_dir.mkdir(exist_ok=True)
+        
+        output_path = output_dir / output_filename
+        
+        try:
+            # Create a localized temp file for the prompt
+            temp_prompt_path = output_dir / ".temp_prompt_buffer.md"
+            with open(temp_prompt_path, "w", encoding="utf-8") as f:
+                f.write(prompt_content)
+
+            # Construct command: cat temp | gemini
+            # This mimics "echo '...' | gemini" or "cat file | gemini" exactly as per docs
+            shell_command = f"cat '{temp_prompt_path}' | {command}"
+            
+            print(f"{Colors.CYAN}[System] Shell: {shell_command}{Colors.ENDC}")
+
+            process = subprocess.Popen(
+                shell_command, 
+                shell=True, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                text=True,
+                env=os.environ.copy()
+            )
+            
+            # Start spinner
+            original_msg = f"  Waiting for {command}..."
+            spinner = Spinner(f"{Colors.YELLOW}{original_msg}{Colors.ENDC}")
+            spinner.start()
+            
+            try:
+                stdout, stderr = process.communicate()
+            finally:
+                spinner.stop()
+            
+            # Clean up temp file
+            if temp_prompt_path.exists():
+                temp_prompt_path.unlink()
+
+            if process.returncode != 0:
+                print(f"{Colors.FAIL}Error executing command (stderr):{Colors.ENDC}")
+                print(stderr)
+                if stdout:
+                    print(f"{Colors.WARNING}Stdout (partial):{Colors.ENDC}\n{stdout[:500]}...")
+                return False
+                
+            # Write output to file
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(stdout)
+                
+            print(f"{Colors.GREEN}✓ Output saved to: active_workspace/output/{output_filename}{Colors.ENDC}")
+            return True
+            
+        except Exception as e:
+            print(f"{Colors.FAIL}Exception: {str(e)}{Colors.ENDC}")
+            return False
+
     # --- ACTIONS ---
 
     def action_init_project(self):
@@ -106,7 +208,7 @@ class KitchenAssistant:
     def action_strategy_prompt(self):
         print(f"{Colors.BOLD}>>> Generating Phase 1: Strategy Prompt{Colors.ENDC}")
         prompt = self.render_template("01_strategy.md", self.config)
-        self.print_prompt_box(prompt)
+        self.print_prompt_box(prompt, filename_hint="01_strategy.md")
         print(f"\n{Colors.WARNING}NEXT STEP:{Colors.ENDC} Paste this prompt to your LLM.")
         print("Once you have the result, come back and run 'Record Strategy'.")
         self.wait_for_enter()
@@ -145,7 +247,7 @@ class KitchenAssistant:
             return
 
         prompt = self.render_template("02_context.md", self.config)
-        self.print_prompt_box(prompt)
+        self.print_prompt_box(prompt, filename_hint="NONE") # No output file needed usually, just context loading
         print(f"\n{Colors.WARNING}NOTE:{Colors.ENDC} This prompt loads your Master Specs into the LLM context.")
         self.wait_for_enter()
 
@@ -159,7 +261,7 @@ class KitchenAssistant:
                 return
 
         prompt = self.render_template("03_kitchen_sink.md", self.config)
-        self.print_prompt_box(prompt)
+        self.print_prompt_box(prompt, filename_hint="kitchen-sink.html")
         print(f"\n{Colors.WARNING}GOAL:{Colors.ENDC} Generate 'kitchen-sink.html' to validate the design system.")
         self.wait_for_enter()
 
@@ -190,7 +292,8 @@ class KitchenAssistant:
         }
 
         prompt = self.render_template("04_production.md", temp_config)
-        self.print_prompt_box(prompt)
+        safe_name = re.sub(r'[^a-zA-Z0-9]', '_', p_name.lower())
+        self.print_prompt_box(prompt, filename_hint=f"{safe_name}.html")
         self.wait_for_enter()
 
     # --- HELPERS ---
@@ -236,20 +339,42 @@ class KitchenAssistant:
         except (KeyError, TypeError):
             return None
 
-    def print_prompt_box(self, content):
+    def print_prompt_box(self, content, filename_hint=None):
+        # Initial auto-copy
         copied = self.copy_to_clipboard(content)
         
         print(f"\n{Colors.CYAN}" + "▼" * 30 + " START OF PROMPT " + "▼" * 30 + f"{Colors.ENDC}")
         if copied:
-             print(f"{Colors.BG_CYAN}  SUCCESS: COPIED TO CLIPBOARD! (Ready to paste)  {Colors.ENDC}")
+             print(f"{Colors.BG_CYAN}  SUCCESS: COPIED TO CLIPBOARD!  {Colors.ENDC}")
         else:
-             print(f"{Colors.FAIL}  (Clipboard copy failed - please verify you have pbcopy installed)  {Colors.ENDC}")
+             print(f"{Colors.FAIL}  (Clipboard copy failed)  {Colors.ENDC}")
         
         print(content)
         
         print(f"\n{Colors.CYAN}" + "▲" * 30 + " END OF PROMPT " + "▲" * 30 + f"{Colors.ENDC}")
-        if copied:
-            print(f"{Colors.BG_CYAN}  (Already in your clipboard)  {Colors.ENDC}")
+        
+        # Interactive Menu
+        while True:
+            print(f"\n{Colors.BOLD}Action:{Colors.ENDC}")
+            print(f"  [{Colors.GREEN}C{Colors.ENDC}] Copy to Clipboard (again)")
+            if filename_hint and filename_hint != "NONE":
+                print(f"  [{Colors.WARNING}E{Colors.ENDC}] Execute with LLM ({self.config.get('llm', {}).get('command', 'gemini')}) -> output/{filename_hint}")
+            print(f"  [{Colors.FAIL}Q{Colors.ENDC}] Quit menu (Continue workflow)")
+            
+            choice = input(f"{Colors.BLUE}> {Colors.ENDC}").strip().lower()
+            
+            if choice == 'c':
+                if self.copy_to_clipboard(content):
+                    print(f"{Colors.GREEN}✓ Copied.{Colors.ENDC}")
+                else:
+                    print(f"{Colors.FAIL}✗ Copy failed.{Colors.ENDC}")
+            elif choice == 'e' and filename_hint and filename_hint != "NONE":
+                self.run_llm_command(content, filename_hint)
+                break # Usually we want to continue after execution
+            elif choice == 'q' or choice == '':
+                break
+            else:
+                pass
 
     def run(self):
         while True:

@@ -1,10 +1,10 @@
 Agis en tant que **Lead UI Designer & Front-End Architect**.
 
 **OBJECTIF :**
-Générer une "Kitchen Sink" (page de démonstration UI complète) en Tailwind CSS v4 + Alpine.js basée sur le fichier `MASTER_UI_SPECS.md` analysé précédemment, adaptée à la Direction Artistique ci-dessous.
+Générer une "Kitchen Sink" (page de démonstration UI complète) en Tailwind CSS v4 + Alpine.js basée sur le fichier @MASTER_UI_SPECS.md analysé, adaptée à la Direction Artistique ci-dessous.
 
 **STRATÉGIE CSS (HYBRIDE) :**
-1.  **Pour les Composants (Base) :** Utilise les classes définies dans `MASTER_UI_SPECS.md` (ex: `.btn`, `.input`, `.badge`). Définis-les dans le bloc CSS via `@layer components` et `@apply`.
+1.  **Pour les Composants (Base) :** Utilise les classes définies dans MASTER_UI_SPECS.md (ex: `.btn`, `.input`, `.badge`). Définis-les dans le bloc CSS via `@layer components` et `@apply`.
 2.  **Pour le Layout & Context (Custom) :** Utilise des **classes utilitaires Tailwind pures** directement dans le HTML pour gérer les grilles, le spacing (margin/padding), le positionnement et les largeurs spécifiques (ex: `grid-cols-3 gap-6 mt-10`).
 
 **DIRECTIVES DE DESIGN (VIBE) :**

@@ -1,0 +1,20 @@
+{
+  "project": {
+    "name": "My New Project",
+    "description": "A briefly described project.",
+    "target": "General Audience",
+    "vibe": "Modern, Clean, Professional"
+  },
+  "strategy": {
+    "archetype": "The Creator",
+    "colors": {
+      "primary": "#3b82f6",
+      "secondary": "#10b981",
+      "neutral": "#64748b"
+    },
+    "typography": {
+      "heading": "Inter",
+      "body": "Inter"
+    }
+  }
+}

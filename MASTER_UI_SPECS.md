@@ -1,17 +1,15 @@
-## 🔧 GLOBAL TAILWIND CONFIGURATION STRATEGY
+## 🔧 UI Specifications
 
-*Instruction to AI:* Before generating components, define these values in `tailwind.config.js` based on the project's "Vibe".
+# ⚠️ HYBRID STRATEGY RULES (CRITICAL)
 
-* **Colors:** Define `primary`, `secondary`, `accent`, `neutral`, `base-100` (surface), `info`, `success`, `warning`, `error`.
-* **Border Radius:** Define generic `rounded-btn`, `rounded-box` (cards), `rounded-badge`.
-* **Typography:** Define a `font-sans` (UI) and `font-display` (Headings) if needed.
-* **Animation:** Define `keyframes` for skeletons and loaders in `extend`.
+To ensure maintainability and consistency, you must follow this **Hybrid Strategy**:
 
-C'est la brique manquante essentielle. En Design System, on appelle cela les **"Foundations"** ou les **"Design Tokens"**.
-
-Sans cela, l'IA va improviser des couleurs et des tailles de texte à chaque génération, et ton site ressemblera à un patchwork. Il faut définir des règles strictes.
-
-Voici le bloc **"0. FOUNDATIONS"** à placer tout au début de ton fichier `MASTER_UI_SPECS.md`. Il dicte à l'IA comment configurer le fichier `tailwind.config.js`.
+1.  **COMPONENTS (Atoms/Molecules):** MUST be defined in CSS using `@layer components` and `@apply`.
+    *   *Bad:* `<button class="bg-blue-500 text-white px-4 py-2 rounded">`
+    *   *Good:* `<button class="btn btn-primary">` + CSS: `.btn-primary { @apply bg-primary text-white; }`
+2.  **LAYOUT (Organisms/Pages):** MUST use utility classes directly in HTML.
+    *   *Good:* `<div class="grid grid-cols-2 gap-8 mt-12">`
+3.  **NAMING:** Use BEM-like naming for component children (e.g., `.card`, `.card-body`, `.card-title`).
 
 ---
 
@@ -20,297 +18,253 @@ Voici le bloc **"0. FOUNDATIONS"** à placer tout au début de ton fichier `MAST
 **Context:** These definitions must populate the `@theme` section of `<style type="text/tailwindcss">`.
 
 ## A. COLORS (SEMANTIC PALETTE)
-
-*Instruction to AI:* Do not use hardcoded hex values in components (e.g., `bg-[#ff0000]`). Always use semantic names mapped in the config.
+*WCAG Note:* Ensure `content` colors provide at least 4.5:1 contrast ratio against their background.
 
 | Token Name | Usage | Tailwind Map |
 | --- | --- | --- |
-| **Primary** | Main Brand Action (Buttons, Links, Active States). | `--color-primary` |
-| **Secondary** | Complementary elements, less prominent actions. | `--color-secondary` |
-| **Accent** | Highlights, badges, visual pops (often distinct/bright). | `--color-accent` |
-| **Neutral** | Text, gray backgrounds, borders. (Dark & Light shades). | `--color-neutral` |
-| **Base (Surface)** | Backgrounds of pages and cards (White, Off-white, Dark). | `--color-base-100` (Page), `--color-base-200` (Secondary bg), `--color-base-300` (Borders). |
+| **Primary** | Main Brand Action (CTA, Active States). | `--color-primary` |
+| **Secondary** | Complementary, less prominent. | `--color-secondary` |
+| **Accent** | Highlights, badges. | `--color-accent` |
+| **Neutral** | Text, gray backgrounds, borders. | `--color-neutral` |
+| **Base (Surface)** | Backgrounds (Level 1, 2, 3). | `--color-base-100`, `--color-base-200`, `--color-base-300`. |
 | **Feedback** | Status messages. | `--color-info`, `--color-success`, `--color-warning`, `--color-error`. |
 
-**🎨 Special Rule for Text Contrast:**
-For every color X, define an `on-X` (or `X-content`) color for text readability.
+## B. TYPOGRAPHY
+*Instruction:* Use a 2-font stack max.
+* **Headings:** `--font-display` (Impactful).
+* **Body:** `--font-sans` (Readable, High x-height).
+* **Mono:** `--font-mono` (Code, Data).
 
-* *Example:* If `primary` is Dark Blue, `primary-content` must be White.
-
-## B. TYPOGRAPHY (SCALE & HIERARCHY)
-
-*Instruction to AI:* Use a 2-font stack maximum.
-
-| Token Name | Usage | Tailwind Map |
-| --- | --- | --- |
-| **Font Display** | Headings (H1-H3), Hero Titles. Impactful. | `--font-display` (e.g., Montserrat, Oswald). |
-| **Font Body** | Paragraphs, UI Labels, Inputs. Readable. | `--font-sans` (e.g., Inter, Roboto). |
-| **Font Mono** | **CRITICAL:** Timer, Results, Data Tables, Codes. | `--font-mono` (e.g., Fira Code, JetBrains Mono). |
-
-**📏 Typescale Strategy:**
-
-* **H1 (Page Title):** `text-4xl md:text-5xl font-bold`
-* **H2 (Section Title):** `text-3xl font-bold`
-* **H3 (Card Title):** `text-xl font-semibold`
-* **Body:** `text-base` (16px) standard, `text-sm` for UI density.
-* **Caption/Label:** `text-xs uppercase tracking-wide`.
-
-**⚠️ Numeric Constraint:**
-For sports results (Times, Rankings), ALWAYS apply `font-variant-numeric: tabular-nums` (Tailwind class: `tabular-nums`) to ensure numbers align vertically.
-
-## C. SPACING & RADIUS (THE "VIBE")
-
-*Instruction to AI:* Adjust these global values based on the requested "Mood".
-
-**1. Border Radius (`rounded-*`)**
-
-* **Playful/Friendly:** `rounded-box: 1rem` (16px), `rounded-btn: 9999px` (Pill).
-* **Serious/Data:** `rounded-box: 0.25rem` (4px), `rounded-btn: 0.25rem`.
-* **Brutalist:** `rounded-none` (0px).
-
-**2. Shadow Depth (`shadow-*`)**
-
-* **Flat Design:** No shadows, utilize borders (`border-2`).
-* **Material/Corporate:** Soft shadows (`shadow-md`, `shadow-lg`).
-
-**3. Section Spacing (`.section`)**
-
-* **Compact:** `py-12` (48px) - For heavy data apps.
-* **Comfortable:** `py-24` (96px) - For marketing/landing pages.
+## C. SPACING & RADIUS
+* **Radius:** `--radius-btn`, `--radius-box`.
+* **Spacing:** Defines the white space rhythm.
 
 ---
 
-## 1. COMPONENT: BUTTON
+# 1. ATOMS (PRIMITIVES)
 
+## 1.1 COMPONENT: BUTTON
 **Class:** `.btn`
-**Tailwind Logic:** Use `@apply` to compose base utilities. Use CSS Variables for dynamic colors to allow easy theming.
+**Tailwind Logic:** Base styles via `@apply`. Variants via CSS classes.
 
 ### 🏛 HTML Structure
-
 ```html
-<button class="btn btn-primary" data-size="md" data-state="idle">
-  <span class="loading loading-spinner hidden group-data-[state=loading]:inline-block"></span>
-  <svg class="w-5 h-5" ...></svg>
-  <span>Button Label</span>
+<button class="btn btn-primary">
+  <svg class="w-5 h-5">...</svg>
+  <span>Action</span>
 </button>
-
 ```
 
 ### 🎨 Tailwind Implementation Guide
+*   **Base (`.btn`):** `@apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[var(--radius-btn)] font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer border-none;`
+*   **Variants:**
+    *   `.btn-primary`: `@apply bg-[var(--color-primary)] text-[var(--color-primary-content)] hover:brightness-110;`
+    *   `.btn-secondary`: `@apply bg-[var(--color-secondary)] text-[var(--color-secondary-content)];`
+    *   `.btn-outline`: `@apply border-2 border-current bg-transparent hover:bg-[var(--color-base-content)] hover:text-[var(--color-base-100)];`
+    *   `.btn-ghost`: `@apply bg-transparent hover:bg-[var(--color-base-200)];`
+*   **Sizes:**
+    *   `.btn-sm`: `@apply px-3 py-1.5 text-sm;`
+    *   `.btn-lg`: `@apply px-8 py-4 text-lg;`
 
-* **Base:** `inline-flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer border-none outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none`.
-* **Variants (Hierarchy):**
-* `.btn-primary`: `@apply bg-primary text-primary-content hover:bg-primary/90`.
-* `.btn-ghost`: `@apply bg-transparent hover:bg-base-200 text-current`.
-* `.btn-outline`: `@apply border-2 border-current bg-transparent hover:bg-current hover:text-base-100`.
-
-
-* **Sizes:** Map to `h-*`, `px-*`, and `text-*`.
-* `sm`: `h-8 px-3 text-xs`
-* `md`: `h-10 px-4 text-sm`
-* `lg`: `h-12 px-6 text-base`
-
-
-
----
-
-## 2. COMPONENT: TEXT INPUT
-
-**Class:** `.input`
-**Tailwind Logic:** Use `ring` utilities for focus states to avoid layout shifts.
+## 1.2 COMPONENT: BADGE
+**Class:** `.badge`
 
 ### 🏛 HTML Structure
-
 ```html
-<div class="form-control w-full">
-  <label class="label">
-    <span class="label-text">Email</span>
-  </label>
-  <div class="relative">
-    <input type="text" placeholder="Type here" class="input input-bordered w-full" />
-    <span class="absolute inset-y-0 right-3 flex items-center text-base-content/50">...</span>
-  </div>
-  <label class="label">
-    <span class="label-text-alt text-error">Error message</span>
-  </label>
-</div>
-
+<span class="badge badge-accent">New</span>
 ```
 
 ### 🎨 Tailwind Implementation Guide
+*   **Base (`.badge`):** `@apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide border;`
+*   **Variants:**
+    *   `.badge-accent`: `@apply border-transparent bg-[var(--color-accent)] text-[var(--color-accent-content)];`
+    *   `.badge-outline`: `@apply border-current bg-transparent text-current;`
 
-* **Base:** `w-full rounded-btn bg-base-100 text-base-content placeholder:text-base-content/40 outline-none transition-all`.
-* **Variants:**
-* `.input-bordered`: `@apply border border-base-300 focus:border-primary focus:ring-1 focus:ring-primary`.
-* `.input-ghost`: `@apply bg-base-200/50 focus:bg-base-100`.
-* `.input-error`: `@apply border-error focus:ring-error text-error`.
-
-
-
----
-
-## 3. COMPONENT: SELECTION (Toggle/Checkbox)
-
-**Class:** `.toggle` / `.checkbox`
-**Tailwind Logic:** Pure CSS styling using `appearance-none` and checking state.
+## 1.3 COMPONENT: AVATAR
+**Class:** `.avatar`
 
 ### 🏛 HTML Structure
-
 ```html
-<label class="cursor-pointer flex items-center gap-3">
-  <input type="checkbox" class="toggle toggle-primary" checked />
-  <span class="label-text">Activate Mode</span>
-</label>
-
+<img src="..." alt="User" class="avatar avatar-md" />
 ```
 
 ### 🎨 Tailwind Implementation Guide
-
-* **Toggle Base:** `appearance-none h-6 w-12 rounded-full bg-base-300 transition-colors duration-200 relative after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all checked:bg-primary checked:after:translate-x-6`.
-* **Checkbox Base:** `appearance-none h-5 w-5 rounded border border-base-300 bg-base-100 checked:bg-primary checked:border-primary focus:ring-2 focus:ring-primary/50 relative checked:after:content-['✓'] checked:after:text-white checked:after:flex checked:after:justify-center checked:after:items-center checked:after:text-xs`.
+*   **Base (`.avatar`):** `@apply rounded-full object-cover bg-[var(--color-base-300)];`
+*   **Sizes:**
+    *   `.avatar-sm`: `@apply h-8 w-8;`
+    *   `.avatar-md`: `@apply h-12 w-12;`
+    *   `.avatar-lg`: `@apply h-20 w-20;`
 
 ---
 
-## 5. COMPONENT: CARD
+# 2. MOLECULES (COMPOUNDS)
 
+## 2.1 COMPONENT: CARD
 **Class:** `.card`
 **Tailwind Logic:** Flex container with distinct internal spacing.
 
 ### 🏛 HTML Structure
-
 ```html
-<div class="card bg-base-100 shadow-xl image-full"> <figure><img src="..." alt="" /></figure>
+<article class="card">
+  <figure class="card-image">
+    <img src="..." alt="..." />
+  </figure>
   <div class="card-body">
-    <h2 class="card-title">Title</h2>
-    <p>Content</p>
-    <div class="card-actions justify-end">
-      <button class="btn btn-primary">Buy Now</button>
+    <h3 class="card-title">Title</h3>
+    <p class="card-text">Description goes here.</p>
+    <div class="card-actions">
+        <button class="btn btn-primary">Go</button>
     </div>
   </div>
-</div>
-
+</article>
 ```
 
 ### 🎨 Tailwind Implementation Guide
+*   **Base (`.card`):** `@apply bg-[var(--color-base-100)] border border-[var(--color-base-200)] rounded-[var(--radius-box)] overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col;`
+*   **Image (`.card-image`):** `@apply aspect-video overflow-hidden relative;`
+    *   *Child Img:* `@apply w-full h-full object-cover transition-transform duration-500 hover:scale-105;`
+*   **Body (`.card-body`):** `@apply p-6 flex flex-col gap-4;`
+*   **Title (`.card-title`):** `@apply font-display text-xl font-bold;`
 
-* **Base:** `overflow-hidden flex flex-col relative`.
-* **Body:** `.card-body` -> `@apply p-6 flex flex-col gap-2`.
-* **Variants:**
-* `image-full`: Logic to overlay text on image using `before:absolute before:inset-0 before:bg-black/50` on the figure or container.
-* `card-side`: `lg:flex-row` (switch from col to row on large screens).
-
-
-
----
-
-## 7. COMPONENT: ACCORDION
-
-**Class:** `.collapse`
-**Tailwind Logic:** Use the `group` class on the container and `group-open:` modifiers. NO JS REQUIRED.
-
-### 🏛 HTML Structure
-
-```html
-<details class="group collapse bg-base-200 rounded-box">
-  <summary class="collapse-title flex justify-between items-center cursor-pointer list-none font-medium">
-    Question?
-    <span class="transition-transform group-open:rotate-180">▼</span>
-  </summary>
-  <div class="collapse-content transition-all duration-300 max-h-0 overflow-hidden group-open:max-h-screen group-open:p-4">
-    <p>Answer content...</p>
-  </div>
-</details>
-
-```
-
----
-
-## 8. COMPONENT: NAVBAR
-
-**Class:** `.navbar`
-**Tailwind Logic:** Flexbox alignment is key.
-
-### 🏛 HTML Structure
-
-```html
-<div class="navbar bg-base-100 shadow-sm">
-  <div class="flex-1">
-    <a class="btn btn-ghost text-xl">daisyUI</a>
-  </div>
-  <div class="flex-none">
-    <ul class="menu menu-horizontal px-1">
-      <li><a>Link</a></li>
-      <li>
-        <details>
-          <summary>Parent</summary>
-          <ul class="p-2 bg-base-100 absolute"> <li><a>Submenu 1</a></li>
-          </ul>
-        </details>
-      </li>
-    </ul>
-  </div>
-</div>
-
-```
-
----
-
-## 10. COMPONENT: DATA TABLE
-
-**Class:** `.table`
-
-### 🏛 HTML Structure
-
-```html
-<div class="overflow-x-auto">
-  <table class="table w-full">
-    <thead>
-      <tr class="bg-base-200">
-        <th>ID</th>
-        <th>Name</th>
-        <th>Result</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="hover:bg-base-200/50 transition-colors">
-        <th>1</th>
-        <td>Michael</td>
-        <td><span class="badge badge-success">Qualified</span></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-```
-
-### 🎨 Tailwind Implementation Guide
-
-* **Base:** `text-left text-sm w-full`.
-* **Cells:** `td, th` -> `@apply px-4 py-3 align-middle`.
-* **Striped:** `tbody tr:nth-child(even)` -> `@apply bg-base-200/30`.
-
----
-
-## 12. COMPONENT: ALERT
-
+## 2.2 COMPONENT: ALERT
 **Class:** `.alert`
-**Tailwind Logic:** Grid layout allows easy icon + text + button alignment.
+**Usage:** Feedback messages.
 
 ### 🏛 HTML Structure
-
 ```html
 <div role="alert" class="alert alert-info">
-  <svg class="stroke-current shrink-0 w-6 h-6" ...></svg>
-  <div>
-    <h3 class="font-bold">New message!</h3>
-    <div class="text-xs">You have 1 unread email</div>
-  </div>
-  <button class="btn btn-sm">See</button>
+  <svg>...</svg>
+  <span>Update available.</span>
 </div>
-
 ```
 
 ### 🎨 Tailwind Implementation Guide
+*   **Base (`.alert`):** `@apply flex items-center gap-4 p-4 rounded-[var(--radius-box)] text-sm font-medium;`
+*   **Variants:**
+    *   `.alert-info`: `@apply bg-[var(--color-info)]/10 text-[var(--color-info)];`
+    *   `.alert-success`: `@apply bg-[var(--color-success)]/10 text-[var(--color-success)];`
+    *   `.alert-error`: `@apply bg-[var(--color-error)]/10 text-[var(--color-error)];`
 
-* **Base:** `grid grid-flow-col justify-items-start text-start items-center gap-4 p-4 rounded-box w-full`.
-* **Variants:** Map `alert-info` to `bg-info/10 text-info border-info/20`.
+## 2.3 COMPONENT: FORM INPUTS
+**Class:** `.input`, `.textarea`, `.select`, `.checkbox`
+
+### 🏛 HTML Structure
+```html
+<div class="form-control">
+  <label class="label" for="email">Email</label>
+  <input type="email" id="email" class="input" />
+</div>
+```
+
+### 🎨 Tailwind Implementation Guide
+*   **Shared Base:** `@apply w-full rounded-md border border-[var(--color-base-300)] bg-[var(--color-base-100)] text-sm placeholder:text-[var(--color-neutral)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all;`
+*   **Input (`.input`):** `@apply h-10 px-3 py-2;`
+*   **Textarea (`.textarea`):** `@apply min-h-[100px] px-3 py-2;`
+*   **Select (`.select`):** `@apply h-10 pl-3 pr-10 appearance-none bg-no-repeat bg-[center_right_1rem];` (Add arrow via inline SVG or global background).
+*   **Checkbox (`.checkbox`):** `@apply h-5 w-5 rounded border-2 border-[var(--color-neutral)] text-[var(--color-primary)] focus:ring-[var(--color-primary)];`
+*   **Label (`.label`):** `@apply block text-sm font-medium mb-1.5;`
+
+## 2.4 COMPONENT: ACCORDION
+**Class:** `.accordion-item`
+
+### 🏛 HTML Structure
+```html
+<details class="accordion-item group">
+  <summary class="accordion-trigger">
+    Question?
+    <span class="icon group-open:rotate-180">▼</span>
+  </summary>
+  <div class="accordion-content">Answer.</div>
+</details>
+```
+
+### 🎨 Tailwind Implementation Guide
+*   **Item (`.accordion-item`):** `@apply border-b border-[var(--color-base-200)];`
+*   **Trigger (`.accordion-trigger`):** `@apply flex w-full cursor-pointer list-none items-center justify-between py-4 font-medium transition-colors hover:text-[var(--color-primary)];`
+*   **Content (`.accordion-content`):** `@apply pb-4 text-[var(--color-neutral)]/80;`
+
+---
+
+# 3. ORGANISMS (SECTIONS)
+
+For Organisms, prioritize **semantic layout**. You may use internal Layout Components (`.container-custom`, `.section`) defined here.
+
+## 3.1 LAYOUT UTILS
+**Define these as global classes.**
+*   `.section`: `@apply py-12 md:py-24;`
+*   `.container-custom`: `@apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;`
+
+## 3.2 COMPONENT: NAVBAR
+**Class:** `.navbar`
+
+### 🏛 HTML Structure
+```html
+<header class="navbar">
+  <div class="container-custom navbar-inner">
+    <a href="/" class="brand">Logo</a>
+    <nav class="nav-desktop">...</nav>
+    <button class="md:hidden">Burger</button>
+  </div>
+</header>
+```
+
+### 🎨 Tailwind Implementation Guide
+*   **Base (`.navbar`):** `@apply sticky top-0 z-50 w-full border-b border-[var(--color-base-200)] bg-[var(--color-base-100)]/90 backdrop-blur supports-[backdrop-filter]:bg-[var(--color-base-100)]/60;`
+*   **Inner (`.navbar-inner`):** `@apply flex h-16 items-center justify-between;`
+*   **Brand (`.brand`):** `@apply text-xl font-bold font-display tracking-tight hover:opacity-80;`
+*   **Nav Desktop (`.nav-desktop`):** `@apply hidden md:flex items-center gap-8 text-sm font-medium;`
+
+## 3.3 COMPONENT: HERO
+**Class:** `.hero`
+
+### 🏛 HTML Structure
+```html
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-text">
+        <h1 class="hero-title">Values</h1>
+        <p class="hero-desc">Subtitle.</p>
+        <div class="flex gap-4">...CTAs...</div>
+    </div>
+    <div class="hero-visual">...Img...</div>
+  </div>
+</section>
+```
+
+### 🎨 Tailwind Implementation Guide
+*   **Base (`.hero`):** `@apply section relative overflow-hidden bg-[var(--color-base-100)];`
+*   **Content (`.hero-content`):** `@apply container-custom grid md:grid-cols-2 gap-12 items-center;`
+*   **Title (`.hero-title`):** `@apply text-4xl md:text-6xl font-bold font-display tracking-tight text-[var(--color-base-content)];`
+*   **Desc (`.hero-desc`):** `@apply mt-6 text-lg text-[var(--color-neutral)] opacity-90 max-w-lg leading-relaxed;`
+
+## 3.4 COMPONENT: FOOTER
+**Class:** `.footer`
+
+### 🏛 HTML Structure
+```html
+<footer class="footer">
+  <div class="footer-content">
+     <!-- Grid Columns defined in HTML via utilities: grid-cols-2 md:grid-cols-4 -->
+  </div>
+</footer>
+```
+
+### 🎨 Tailwind Implementation Guide
+*   **Base (`.footer`):** `@apply bg-[var(--color-base-200)] text-[var(--color-base-content)] py-12 border-t border-[var(--color-base-300)];`
+*   **Content (`.footer-content`):** `@apply container-custom grid grid-cols-2 md:grid-cols-4 gap-10;`
+*   **Title (`.footer-title`):** `@apply font-bold text-xs uppercase tracking-wider opacity-60 mb-4 block;`
+*   **Link (`.footer-link`):** `@apply block text-sm hover:underline hover:text-[var(--color-primary)] py-1 opacity-80 hover:opacity-100 transition-opacity;`
+
+## 3.5 COMPONENT: LIST LAYOUT
+**Class:** `.list-group`
+
+### 🏛 HTML Structure
+```html
+<div class="list-group">
+  <div class="list-item">...</div>
+</div>
+```
+
+### 🎨 Tailwind Implementation Guide
+*   **Group (`.list-group`):** `@apply flex flex-col divide-y divide-[var(--color-base-200)] border border-[var(--color-base-200)] rounded-[var(--radius-box)] overflow-hidden;`
+*   **Item (`.list-item`):** `@apply p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--color-base-100)] hover:bg-[var(--color-base-200)]/50 transition-colors;`

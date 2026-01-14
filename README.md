@@ -1,17 +1,70 @@
-# Conception Web UI assistée par IA
+# Workflow de Conception Web UI assistée par IA
 
-Ce document détaille la procédure standard pour générer le code Front-end des projets.
+Ce document détaille la procédure standard pour générer le code Front-end des projets de manière cohérente et industrielle.
 
-**Pré-requis :**
-
-* Avoir le fichier `MASTER_UI_SPECS.md` à portée de main (tes specs HTML/CSS de base).
-* Avoir défini le "Mood" du projet client.
+## PRÉ-REQUIS & MAINTENANCE
+*   **Fichier maître :** `MASTER_UI_SPECS.md` doit toujours être à jour. C'est la source de vérité technique.
+*   **Outils :** Accès à un LLM performant (Claude 3.5 Sonnet, GPT-4o recommandé).
 
 ---
 
-## ÉTAPE 1 : L'Initialisation (Context Loading)
+## REFERENCE RAPIDE
+1.  **PHASE 1 : Stratégie (The Brand Core)** -> Définir l'ADN du projet.
+2.  **PHASE 2 : Context Loading (The Constraints)** -> Charger les règles techniques.
+3.  **PHASE 3 : Design System (The Kitchen Sink)** -> Valider le design via une page démo.
+4.  **PHASE 4 : Production (The Factory)** -> Générer les pages finales.
 
-*Objectif : Charger les contraintes techniques strictes dans la mémoire de l'IA.*
+---
+
+## PHASE 1 : Stratégie & Identité (The Brand Core)
+
+*Objectif : Extraire l'ADN du projet pour configurer le Design System (Couleurs, Typos, Ambiance).*
+
+**Action :** Copier-coller le prompt suivant. Remplis la section "Informations du Projet".
+
+```markdown
+# Rôle
+Agis en tant que Brand Strategist & Senior UI Designer. Ton but est d'extraire et de formaliser l'identité visuelle d'un projet web à partir de mes notes éparses.
+
+# Instructions
+1. Analyse les informations brutes du projet ci-dessous.
+2. Identifie l'Archétype de marque dominant (selon Jung/Mark & Pearson).
+3. Génère une charte graphique structurée prête pour une implémentation "Design Tokens" (Tailwind v4).
+
+# Informations du Projet
+NOM : [Nom du projet]
+DESCRIPTION : [Explique ici ce que fait le site/l'entreprise]
+CIBLE : [Qui sont les utilisateurs ?]
+Mots-clés / Vibe souhaitée : [ex: Énergie, Confiance, Rapidité, Nature...]
+
+# Format de Sortie (Structure Strictement Requise)
+
+## 1. STRATÉGIE ÉMOTIONNELLE
+- Archétype : [Nom de l'archétype]
+- Promesse visuelle : [Une phrase décrivant ce que l'utilisateur doit ressentir]
+
+## 2. DESIGN TOKENS (Format Tailwind v4)
+- Palette de Couleurs (HEX + Rôle) :
+  - Primary (Brand) : [HEX] (Usage : Boutons principaux, liens)
+  - Secondary (Accent) : [HEX] (Usage : Éléments d'attention)
+  - Neutral (Surfaces) : [Gamme de gris/beiges]
+  - Semantic : (Success, Warning, Error)
+- Typographie :
+  - Heading : [Nom de police Google Font] (Style : ex: Bold 700, Serif)
+  - Body : [Nom de police Google Font] (Style : ex: Regular 400, Sans-serif)
+- Système de formes :
+  - Radius : [ex: 0px (Sharp), 8px (Soft), Full (Pill)]
+  - Shadows : [ex: Flat, Subtle, Elevation high]
+
+## 3. MOODBOARD SÉMANTIQUE (Pour la Phase 3)
+Rédige un paragraphe condensé qui résume le "Mood" pour l'IA génératrice de code.
+```
+
+---
+
+## PHASE 2 : Initialisation Technique (Context Loading)
+
+*Objectif : Charger les contraintes techniques strictes dans la mémoire de l'IA pour garantir la qualité du code.*
 
 **Action :** Copier-coller le prompt suivant en y joignant le contenu de ton fichier `MASTER_UI_SPECS.md`.
 
@@ -19,16 +72,15 @@ Ce document détaille la procédure standard pour générer le code Front-end de
 Voici le fichier MASTER_UI_SPECS.md. C'est ta référence absolue pour la structure HTML et les noms de classes. Analyse-le et attends mon instruction suivante. Ne génère rien pour l'instant.
 
 [COLLER LE CONTENU DE MASTER_UI_SPECS.MD ICI]
-
 ```
 
 ---
 
-## ÉTAPE 2 : La Direction Artistique (The Kitchen Sink)
+## PHASE 3 : Création du Design System (The Kitchen Sink)
 
-*Objectif : Créer le "Look & Feel", définir les tokens (couleurs, typos) et valider l'ambiance avec une page démo.*
+*Objectif : Générer une page de référence ("Kitchen Sink") pour valider le look & feel avant de produire les pages réelles.*
 
-**Action :** Copier-coller le prompt suivant. Remplis la section "DIRECTION ARTISTIQUE" avec les infos du client.
+**Action :** Copier-coller le prompt suivant. Remplis la section "DIRECTION ARTISTIQUE" avec le **Moodboard Sémantique** et les **Design Tokens** générés en Phase 1.
 
 ```markdown
 Agis en tant que **Lead UI Designer & Front-End Architect**.
@@ -62,20 +114,17 @@ Un seul fichier HTML complet `kitchen-sink.html` contenant :
 
 ---
 
-**DIRECTION ARTISTIQUE (MOOD) :**
+**DIRECTION ARTISTIQUE (Issue de la Phase 1) :**
 PROJET : [Nom du Projet]
-AMBIANCE : [ex: Corporate, Ludique, Luxe, Dark Mode, …]
-COULEURS : [ex: Dominante Bleu Nuit, #ff0000, Accent Jaune Fluo, …]
-FORMES : [ex: Arrondis généreux ou Angles vifs...]
-TYPOGRAPHIE : [ex: Serif élégant pour les titres, Sans-serif clean pour le texte...]
-
+AMBIANCE : [Coller ici le Moodboard Sémantique]
+TOKENS CLÉS : [Couleurs principales, choix typo...]
 ```
 
-*Une fois le résultat généré : Copie le code dans un fichier `kitchen-sink.html`, ouvre-le dans le navigateur et valide le design.*
+*Une fois le résultat généré : Copie le code dans un fichier `kitchen-sink.html`, ouvre-le dans le navigateur et valide le design (Mobile, Contrastes, Interactions).*
 
 ---
 
-## ÉTAPE 3 : La Production des Pages (Page Builder)
+## PHASE 4 : Production des Pages (The Factory)
 
 *Objectif : Générer le code spécifique d'une page (ex: Accueil, Contact) en réutilisant le design validé.*
 
@@ -112,5 +161,4 @@ La page doit contenir :
 # Format de Sortie
 Fournis le code HTML (Blade/Antlers) dans un fichier `.html` que tu créé.
 Si tu dois ajouter du CSS spécifique (rare), utilise une balise `<style>` temporaire ou indique les classes utilitaires.
-
 ```

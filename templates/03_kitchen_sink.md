@@ -5,7 +5,8 @@ Générer une "Kitchen Sink" (page de démonstration UI complète) en Tailwind C
 
 **STRATÉGIE CSS (HYBRIDE) :**
 1.  **Pour les Composants (Base) :** Utilise les classes définies dans MASTER_UI_SPECS.md (ex: `.btn`, `.input`, `.badge`). Définis-les dans le bloc CSS via `@layer components` et `@apply`.
-2.  **Pour le Layout & Context (Custom) :** Utilise des **classes utilitaires Tailwind pures** directement dans le HTML pour gérer les grilles, le spacing (margin/padding), le positionnement et les largeurs spécifiques (ex: `grid-cols-3 gap-6 mt-10`).
+2.  **Pour les Helpers de Layout (Custom) :** Si tu utilises `.section-container` ou `.section`, définis-les hors de `@layer components` en utilisant la directive `@utility` (v4) pour qu'ils soient reconnus par `@apply`.
+3.  **Pour le Layout & Context (Spécifique) :** Utilise des **classes utilitaires Tailwind pures** directement dans le HTML pour gérer les grilles et espacements ad-hoc.
 
 **DIRECTIVES DE DESIGN (VIBE) :**
 * Utilise la syntaxe CSS native de Tailwind v4 pour le thème.

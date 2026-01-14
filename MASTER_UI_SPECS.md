@@ -5,11 +5,9 @@
 To ensure maintainability and consistency, you must follow this **Hybrid Strategy**:
 
 1.  **COMPONENTS (Atoms/Molecules):** MUST be defined in CSS using `@layer components` and `@apply`.
-    *   *Bad:* `<button class="bg-blue-500 text-white px-4 py-2 rounded">`
-    *   *Good:* `<button class="btn btn-primary">` + CSS: `.btn-primary { @apply bg-primary text-white; }`
-2.  **LAYOUT (Organisms/Pages):** MUST use utility classes directly in HTML.
-    *   *Good:* `<div class="grid grid-cols-2 gap-8 mt-12">`
-3.  **NAMING:** Use BEM-like naming for component children (e.g., `.card`, `.card-body`, `.card-title`).
+2.  **CUSTOM UTILITIES (Layout Helpers):** Global helpers like `.section-container` or `.section` MUST be defined using `@utility` (Tailwind v4 syntax).
+3.  **LAYOUT (Organisms/Pages):** MUST use utility classes directly in HTML for specific grid/flex structures.
+4.  **NAMING:** Use BEM-like naming for component children (e.g., `.card`, `.card-body`, `.card-title`).
 
 ---
 
@@ -187,12 +185,12 @@ To ensure maintainability and consistency, you must follow this **Hybrid Strateg
 
 # 3. ORGANISMS (SECTIONS)
 
-For Organisms, prioritize **semantic layout**. You may use internal Layout Components (`.container-custom`, `.section`) defined here.
+For Organisms, prioritize **semantic layout**. You may use internal Layout Utilities (`@utility section-container`, `@utility section`) defined here.
 
-## 3.1 LAYOUT UTILS
-**Define these as global classes.**
-*   `.section`: `@apply py-12 md:py-24;`
-*   `.container-custom`: `@apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;`
+## 3.1 LAYOUT UTILITIES
+**CRITICAL (Tailwind v4):** These must be defined using the `@utility` directive so they can be discovered by `@apply`.
+*   `@utility section`: { @apply py-20 md:py-32; }
+*   `@utility section-container`: { @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
 
 ## 3.2 COMPONENT: NAVBAR
 **Class:** `.navbar`
@@ -200,7 +198,7 @@ For Organisms, prioritize **semantic layout**. You may use internal Layout Compo
 ### 🏛 HTML Structure
 ```html
 <header class="navbar">
-  <div class="container-custom navbar-inner">
+  <div class="section-container navbar-inner">
     <a href="/" class="brand">Logo</a>
     <nav class="nav-desktop">...</nav>
     <button class="md:hidden">Burger</button>
@@ -233,7 +231,7 @@ For Organisms, prioritize **semantic layout**. You may use internal Layout Compo
 
 ### 🎨 Tailwind Implementation Guide
 *   **Base (`.hero`):** `@apply section relative overflow-hidden bg-[var(--color-base-100)];`
-*   **Content (`.hero-content`):** `@apply container-custom grid md:grid-cols-2 gap-12 items-center;`
+*   **Content (`.hero-content`):** `@apply grid md:grid-cols-2 gap-12 items-center;`
 *   **Title (`.hero-title`):** `@apply text-4xl md:text-6xl font-bold font-display tracking-tight text-[var(--color-base-content)];`
 *   **Desc (`.hero-desc`):** `@apply mt-6 text-lg text-[var(--color-neutral)] opacity-90 max-w-lg leading-relaxed;`
 
@@ -251,7 +249,7 @@ For Organisms, prioritize **semantic layout**. You may use internal Layout Compo
 
 ### 🎨 Tailwind Implementation Guide
 *   **Base (`.footer`):** `@apply bg-[var(--color-base-200)] text-[var(--color-base-content)] py-12 border-t border-[var(--color-base-300)];`
-*   **Content (`.footer-content`):** `@apply container-custom grid grid-cols-2 md:grid-cols-4 gap-10;`
+*   **Content (`.footer-content`):** `@apply section-container grid grid-cols-2 md:grid-cols-4 gap-10;`
 *   **Title (`.footer-title`):** `@apply font-bold text-xs uppercase tracking-wider opacity-60 mb-4 block;`
 *   **Link (`.footer-link`):** `@apply block text-sm hover:underline hover:text-[var(--color-primary)] py-1 opacity-80 hover:opacity-100 transition-opacity;`
 
